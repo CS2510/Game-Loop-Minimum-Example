@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>A Game Loop-Based Game</title>
+
+    <!-- Let the canvas fill the whole browser window -->
+    <style>
+        * {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canv">
+    </canvas>
+
+    <script>
+        //The "model" of our game
+        let x = 50
+        let y = 110
+        let score = 0
+        let isDead = false;
+
+        //The state of the input
+        let keysDown = []
+
+        /**
+         * The game loop.
+         * The game loop calls update and draw using a timer
+         */
+        function gameLoop() {
+            update()
+            draw()
+        }
+
+        /**
+         * Update the model.
+         * Note that this function *only*
+         * changes the model. No drawing happens
+         */
+        function update() {
+            if (!isDead) {
+                let speed = 100
+                if (keysDown.includes("ArrowLeft"))
+                    x -= speed / fps
+                if (keysDown.includes("ArrowRight"))
+                    x += speed / fps
+                if (keysDown.includes("ArrowUp"))
+                    y -= speed / fps
+                if (keysDown.includes("ArrowDown"))
+                    y += speed / fps
+                score++
+
+                if (x < 0) {
+                    isDead = true;
+                }
+            }
+        }
+
+        /**
+         * Draw the model.
+         * Note that we only *read* the model, we never change it
+         * This allows of separation of concerns
+         */
+        function draw() {
+            //Get the canvas element and its context
+            let canvas = document.querySelector("#canv")
+            let ctx = canvas.getContext("2d")
+
+            if (!isDead) {
+                //Clear the canvas
+                ctx.fillStyle = "lightgray"
+                ctx.beginPath()
+                ctx.rect(0, 0, canvas.width, canvas.height)
+                ctx.fill()
+
+                //Draw the circle with a green interior
+                //and purple outline
+                ctx.beginPath();
+                ctx.fillStyle = "green"
+                ctx.strokeStyle = "purple"
+                ctx.lineWidth = 5
+                ctx.arc(50 + x, 50 + y, 50, 0, Math.PI * 2)
+                ctx.fill()
+                ctx.stroke()
+
+                ctx.fillStyle = "black"
+                ctx.font = "30px Times"
+                ctx.fillText("Score: " + score, 10, 30)
+                ctx.fillText("Use the arrow keys to move the circle.", 10, 60)
+                ctx.fillText("The game ends if you touch the left edge.", 10, 90)
+            }
+            else {
+                ctx.fillStyle = "black"
+                ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+                ctx.fillStyle = "red"
+                ctx.font = "30px Comic Sans MS"
+                ctx.fillText("You Died. Refresh the window to restart.", 30, 60)
+            }
+        }
+
+        /* Event handling */
+
+        /* If a key goes down, add it to the list of keys that are down if the key is not already down */
+        function keydown(e) {
+            if (!keysDown.includes(e.code))
+                keysDown.push(e.code)
+        }
+
+        /* If a key goes up, remove it from our list of keys that are down */
+        function keyup(e) {
+            let index = keysDown.indexOf(e.code)
+            keysDown.splice(index, 1)
+        }
+
+        /* Setup up the basics of drawing and event handling in our game. */
+        function setup() {
+            document.addEventListener("keydown", keydown)
+            document.addEventListener("keyup", keyup)
+
+            let canvas = document.querySelector("#canv")
+            let ctx = canvas.getContext("2d")
+
+            //Make the canvas the same size as our window
+            //so it is "full screen"
+            canvas.width = window.innerWidth
+            canvas.height = window.innerHeight
+        }
+
+        setup()
+
+        //In the background, call the gameLoop every 50ms.
+        let ms = 20;
+        let fps = 1000 / ms;
+        setInterval(gameLoop, ms)
+    </script>
+</body>
+
+</html>
