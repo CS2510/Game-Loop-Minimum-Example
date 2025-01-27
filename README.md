@@ -1,2 +1,2 @@
 # Game-Loop-Minimum-Example
-A minimal example of a game loop-based game
+The repo contains several examples of simple games that use a basic game loop.
